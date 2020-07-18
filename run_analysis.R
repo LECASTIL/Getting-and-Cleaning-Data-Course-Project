@@ -4,21 +4,21 @@ setwd("C:/coursera/")
 # 1. Merge  and the test  to create one data set
 
 if(!file.exists("./data")) dir.create("./data")
-fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
-download.file(fileUrl, destfile = "./data/projectData_getCleanData.zip")
+file <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+download.file(file, destfile = "./data/projectData_getCleanData.zip")
 
 listZip <- unzip("./data/projectData_getCleanData.zip", exdir = "./data")
 
-train.x <- read.table("./data/UCI HAR Dataset/train/X_train.txt")
-train.y <- read.table("./data/UCI HAR Dataset/train/y_train.txt")
-train.subject <- read.table("./data/UCI HAR Dataset/train/subject_train.txt")
-test.x <- read.table("./data/UCI HAR Dataset/test/X_test.txt")
-test.y <- read.table("./data/UCI HAR Dataset/test/y_test.txt")
-test.subject <- read.table("./data/UCI HAR Dataset/test/subject_test.txt")
+trainx <- read.table("./data/UCI HAR Dataset/train/X_train.txt")
+trainy <- read.table("./data/UCI HAR Dataset/train/y_train.txt")
+trainsubject <- read.table("./data/UCI HAR Dataset/train/subject_train.txt")
+testx <- read.table("./data/UCI HAR Dataset/test/X_test.txt")
+testy <- read.table("./data/UCI HAR Dataset/test/y_test.txt")
+testsubject <- read.table("./data/UCI HAR Dataset/test/subject_test.txt")
 
-trainData <- cbind(train.subject, train.y, train.x)
-testData <- cbind(test.subject, test.y, test.x)
-fullData <- rbind(trainData, testData)
+trainData <- cbind(trainsubject, trainy, trainx)
+testData <- cbind(testsubject, testy, testx)
+fData <- rbind(trainData, testData)
 
 
 # 2. Extract the measurements on the mean and standard deviation 
@@ -26,30 +26,30 @@ fullData <- rbind(trainData, testData)
 featureName <- read.table("./data/UCI HAR Dataset/features.txt", stringsAsFactors = FALSE)[,2]
 
 featureIndex <- grep(("mean\\(\\)|std\\(\\)"), featureName)
-finalData <- fullData[, c(1, 2, featureIndex+2)]
-colnames(finalData) <- c("subject", "activity", featureName[featureIndex])
+fData <- fullData[, c(1, 2, featureIndex+2)]
+colnames(fData) <- c("subject", "activity", featureName[featureIndex])
 
 
 # 3. Uses descriptive activity names 
 
 activityName <- read.table("./data/UCI HAR Dataset/activity_labels.txt")
 
-finalData$activity <- factor(finalData$activity, levels = activityName[,1], labels = activityName[,2])
+fData$activity <- factor(fData$activity, levels = activityName[,1], labels = activityName[,2])
 
 
 # 4. labels the data set 
 
-names(finalData) <- gsub("\\()", "", names(finalData))
-names(finalData) <- gsub("^t", "time", names(finalData))
-names(finalData) <- gsub("^f", "frequence", names(finalData))
-names(finalData) <- gsub("-mean", "Mean", names(finalData))
-names(finalData) <- gsub("-std", "Std", names(finalData))
+names(fData) <- gsub("\\()", "", names(fData))
+names(fData) <- gsub("^t", "time", names(fData))
+names(fData) <- gsub("^f", "frequence", names(fData))
+names(fData) <- gsub("-mean", "Mean", names(fData))
+names(fData) <- gsub("-std", "Std", names(fData))
 
 # 5. From the data set in step 4, creates a second, independent tidy data set 
 
 library(dplyr)
-groupData <- finalData %>%
+gData <- fData %>%
   group_by(subject, activity) %>%
   summarise_each(funs(mean))
 
-write.table(groupData, "./Getting_and_Cleaning_data_Project/MeanData.txt", row.names = FALSE)
+write.table(gData, "./Getting_and_Cleaning_data_Project/MeanData.txt", row.names = FALSE)
